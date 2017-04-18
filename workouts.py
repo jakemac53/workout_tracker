@@ -8,8 +8,9 @@ pygame.init()
 pygame.font.init()
 black = 0, 0, 0
 white = 255, 255, 255
-size = width, height = 1080, 1080
-screen = pygame.display.set_mode(size)
+screen = pygame.display.set_mode((0,0), pygame.FULLSCREEN)
+width = screen.get_width();
+height = screen.get_height();
 
 # The database connection
 conn = setupDb()
