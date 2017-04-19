@@ -27,7 +27,7 @@ class Clock(pygame.sprite.Sprite):
         self.image = self.font.render(self.print(), 0, white)
         self.state = CLOCK_STOPPED
 
-    def update(self):
+    def update(self, events):
         self.image = self.font.render(self.print(), 0, white)
 
     def start(self):
@@ -84,16 +84,31 @@ class ResetButton(pygame.sprite.Sprite):
 
 class StartStopButton(pygame.sprite.Sprite):
     # Constructor. Pass in the text, color, and its x and y position
-    def __init__(self, clock):
+    def __init__(self, clock, key):
         # Call the parent class (Sprite) constructor
         pygame.sprite.Sprite.__init__(self)
 
         # Set up a font object and render the text
         self.font = pygame.font.Font(pygame.font.get_default_font(), 40)
         self.clock = clock
+        self.key = key
         self.update()
 
-    def update(self):
+    def update(self, events = []):
+        for event in events:
+            # handle MOUSEBUTTONUP
+            if event.type == pygame.MOUSEBUTTONUP:
+                pos = pygame.mouse.get_pos()
+                # get a list of all sprites that are under the mouse cursor
+                if self.rect.collidepoint(pos): self.click()
+
+            if event.type == pygame.KEYUP:
+                if event.key == self.key:
+                    if pygame.key.get_mods() & pygame.KMOD_SHIFT:
+                        self.clock.reset()
+                    else:
+                        self.click()
+
         text = "START" if self.clock.state == CLOCK_STOPPED else "STOP"
         renderedText = self.font.render(text, 0, blue)
 
@@ -124,34 +139,21 @@ clocks = [
     Clock(pygame.Rect(clockWidth, clockHeight, clockWidth, clockHeight)),
 ]
 buttons = []
+keynum = 0
 for clock in clocks:
-    clock.start()
-    buttons.append(StartStopButton(clock))
+    keynum += 1
+    key = getattr(pygame, 'K_%d' % keynum)
+    buttons.append(StartStopButton(clock, key))
     buttons.append(ResetButton(clock))
 sprites = pygame.sprite.Group(clocks, buttons)
 
 # Main game loop
 while 1:
-    for event in pygame.event.get():
+    events = pygame.event.get()
+    for event in events:
         if event.type == pygame.QUIT: sys.exit()
 
-        # handle MOUSEBUTTONUP
-        if event.type == pygame.MOUSEBUTTONUP:
-            pos = pygame.mouse.get_pos()
-            # get a list of all sprites that are under the mouse cursor
-            for b in buttons:
-                if b.rect.collidepoint(pos): b.click()
-        if event.type == pygame.KEYUP:
-            if event.key == pygame.K_1:
-                clocks[0].reset()
-            elif event.key == pygame.K_2:
-                clocks[1].reset()
-            elif event.key == pygame.K_3:
-                clocks[2].reset()
-            elif event.key == pygame.K_4:
-                clocks[3].reset()
-
     screen.fill(black)
-    sprites.update()
+    sprites.update(events)
     sprites.draw(screen)
     pygame.display.flip()
