@@ -8,7 +8,7 @@ pygame.init()
 pygame.font.init()
 black = 0, 0, 0
 white = 255, 255, 255
-screen = pygame.display.set_mode((0,0), pygame.FULLSCREEN)
+screen = pygame.display.set_mode((0,0))
 width = screen.get_width();
 height = screen.get_height();
 
