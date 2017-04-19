@@ -8,8 +8,7 @@ white = 255, 255, 255
 red = 255, 0, 0
 green = 0, 255, 0
 blue = 0, 0, 255
-screen = pygame.display.set_mode((0,0))
-# screen = pygame.display.set_mode((0,0), pygame.FULLSCREEN)
+screen = pygame.display.set_mode((0,0), pygame.FULLSCREEN)
 screenWidth = screen.get_width();
 screenHeight = screen.get_height();
 
@@ -54,6 +53,29 @@ class Clock(pygame.sprite.Sprite):
         time = self.elapsed()
         return "%d%d:%d%d" % ((time / 600), (time / 60) % 10, (time % 60) / 10, time % 10)
 
+class CloseButton(pygame.sprite.Sprite):
+    def __init__(self):
+        # Call the parent class (Sprite) constructor
+        pygame.sprite.Sprite.__init__(self)
+        self.font = pygame.font.Font(pygame.font.get_default_font(), 20)
+        renderedText = self.font.render('x', 0, red)
+        self.rect = renderedText.get_rect()
+        self.rect.move_ip(screenWidth - self.rect.w, 0)
+        # Set the actual image
+        self.image = pygame.Surface((self.rect.w, self.rect.h))
+        self.image.blit(renderedText, (0, 0))
+
+    def update(self, events):
+        for event in events:
+            # handle MOUSEBUTTONUP
+            if event.type == pygame.MOUSEBUTTONUP:
+                pos = pygame.mouse.get_pos()
+                # get a list of all sprites that are under the mouse cursor
+                if self.rect.collidepoint(pos): self.click()
+
+    def click(self):
+        sys.exit()
+
 class ResetButton(pygame.sprite.Sprite):
     # Constructor. Pass in the text, color, and its x and y position
     def __init__(self, clock):
@@ -78,6 +100,14 @@ class ResetButton(pygame.sprite.Sprite):
         self.image = pygame.Surface((self.rect.w, self.rect.h))
         self.image.fill(green)
         self.image.blit(renderedText, (10, 10))
+
+    def update(self, events):
+        for event in events:
+            # handle MOUSEBUTTONUP
+            if event.type == pygame.MOUSEBUTTONUP:
+                pos = pygame.mouse.get_pos()
+                # get a list of all sprites that are under the mouse cursor
+                if self.rect.collidepoint(pos): self.click()
 
     def click(self):
         self.clock.reset()
@@ -145,7 +175,8 @@ for clock in clocks:
     key = getattr(pygame, 'K_%d' % keynum)
     buttons.append(StartStopButton(clock, key))
     buttons.append(ResetButton(clock))
-sprites = pygame.sprite.Group(clocks, buttons)
+closeButton = CloseButton()
+sprites = pygame.sprite.Group(clocks, buttons, closeButton)
 
 # Main game loop
 while 1:
